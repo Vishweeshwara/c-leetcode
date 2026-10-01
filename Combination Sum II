@@ -1,0 +1,46 @@
+#include <stdlib.h>
+#include <string.h>
+
+int cmp(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
+
+void backtrack(int* candidates, int candidatesSize, int target, int*** result, int* returnSize, int** returnColumnSizes, int* current, int currentSize, int index) {
+    if (target == 0) {
+        (*result) = (int**)realloc(*result, ((*returnSize) + 1) * sizeof(int*));
+        (*returnColumnSizes) = (int*)realloc(*returnColumnSizes, ((*returnSize) + 1) * sizeof(int));
+        
+        (*result)[*returnSize] = (int*)malloc(currentSize * sizeof(int));
+        memcpy((*result)[*returnSize], current, currentSize * sizeof(int));
+        (*returnColumnSizes)[*returnSize] = currentSize;
+        (*returnSize)++;
+        return;
+    }
+
+    for (int i = index; i < candidatesSize; i++) {
+        if (candidates[i] > target) {
+            break;
+        }
+        if (i > index && candidates[i] == candidates[i - 1]) {
+            continue;
+        }
+        
+        current[currentSize] = candidates[i];
+        backtrack(candidates, candidatesSize, target - candidates[i], result, returnSize, returnColumnSizes, current, currentSize + 1, i + 1);
+    }
+}
+
+int** combinationSum2(int* candidates, int candidatesSize, int target, int* returnSize, int** returnColumnSizes) {
+    qsort(candidates, candidatesSize, sizeof(int), cmp);
+    
+    int** result = NULL;
+    *returnSize = 0;
+    *returnColumnSizes = NULL;
+    
+    int* current = (int*)malloc(candidatesSize * sizeof(int));
+    
+    backtrack(candidates, candidatesSize, target, &result, returnSize, returnColumnSizes, current, 0, 0);
+    
+    free(current);
+    return result;
+}
